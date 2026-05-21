@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  COMPANY
+  CANDIDATE
+  ADMIN
+}
+
+model User {
+  id              String           @id @default(uuid())
+  name            String
+  email           String           @unique
+  password        String
+  role            Role             @default(CANDIDATE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  jobs            Job[]            // Si es COMPANY
+  cvs             Cv[]             // Si es CANDIDATE
+  personalityTest PersonalityTest?
+}
+
+model Job {
+  id          String     @id @default(uuid())
+  title       String
+  description String     @db.Text
+  skills      String[]
+  experience  Int        // en años
+  companyId   String
+  company     User       @relation(fields: [companyId], references: [id])
+  analyses    Analysis[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Cv {
+  id         String     @id @default(uuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id])
+  fileUrl         String
+  parsedText      String     @db.Text
+  generalAnalysis Json?
+  analyses        Analysis[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Analysis {
+  id              String   @id @default(uuid())
+  cvId            String
+  cv              Cv       @relation(fields: [cvId], references: [id])
+  jobId           String
+  job             Job      @relation(fields: [jobId], references: [id])
+  score           Int
+  strengths       String[]
+  weaknesses      String[]
+  recommendations String[]
+  createdAt       DateTime @default(now())
+  interviews      Interview[]
+}
+
+model Interview {
+  id          String   @id @default(uuid())
+  analysisId  String
+  analysis    Analysis @relation(fields: [analysisId], references: [id])
+  scheduledAt DateTime
+  location    String   // URL de Meet o dirección física
+  notes       String?  @db.Text
+  status      String   @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PersonalityTest {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers         Json     // Respuestas: { q1: 5, q2: 4, ... }
+  scores          Json     // Puntajes: { openness: 80, conscientiousness: 90, ... }
+  personalityType String   // Nombre de arquetipo (ej: "El Organizador Estratégico")
+  summary         String   @db.Text
+  traits          String[] // Palabras clave: ["Precisión", "Disciplina", "Planificación"]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
