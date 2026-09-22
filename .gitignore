@@ -1,0 +1,33 @@
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# Environment files
+.env
+*.env
+**/.env
+
+# Build outputs
+dist/
+**/dist/
+.next/
+**/.next/
+build/
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Uploaded files
+uploads/
+**/uploads/*
+!**/uploads/.gitkeep
